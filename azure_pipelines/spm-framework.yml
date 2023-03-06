@@ -84,9 +84,9 @@ jobs:
       script: |
         # Building xcframework
         cd $(Build.BinariesDirectory)
-
+        
         echo "Build Dir = $(pwd)"
-
+        
         xcodebuild -create-xcframework \
         -framework $(Build.binariesDirectory)/iOS.xcarchive/Products/Library/Frameworks/MSAL.framework \
         -framework $(Build.binariesDirectory)/iOS-Sim.xcarchive/Products/Library/Frameworks/MSAL.framework \
@@ -145,7 +145,7 @@ jobs:
       script: |
         chksm=$(shasum -a 256 $(Build.ArtifactStagingDirectory)/MSAL.zip | cut -d ' ' -f 1)
         echo "##vso[task.setvariable variable=frameworkChecksum]${chksm}"
-
+        
         #Regex for semver versioning
         ver=$(egrep -om1 '\[((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)\]' CHANGELOG.md | sed -E -e "s/\[|\]//g")
         echo "##vso[task.setvariable variable=releaseVersion]${ver}"
@@ -153,24 +153,24 @@ jobs:
       failOnStderr: true
       noProfile: false
       noRc: false
-
+      
   - task: Shellpp@0
     displayName: Generating release archive zips
     inputs:
       type: 'FilePath'
       scriptPath: 'ReleaseArchive.sh'
       args: '$(releaseVersion) $(Build.ArtifactStagingDirectory)'
-
+      
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Generate SBOM file'
     inputs:
       BuildDropPath: '$(Build.ArtifactStagingDirectory)'
-
+      
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: $(Build.ArtifactStagingDirectory)
       artifactName: Artifact
-
+      
   - task: Bash@3
     displayName: Common Core - extract release version from changelog | Build release notes
     inputs:
@@ -210,7 +210,7 @@ jobs:
     displayName: Generate Common Core Github Release
     inputs:
       gitHubConnection: '$(GithubServiceConnection)'
-      repositoryName: 'oksanaklimko/microsoft-authentication-library-common-for-objc'
+      repositoryName: 'AzureAD/microsoft-authentication-library-common-for-objc'
       action: 'create'
       target: 'master'
       tagSource: 'userSpecifiedTag'
